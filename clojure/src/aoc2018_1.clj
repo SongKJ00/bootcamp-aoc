@@ -1,37 +1,47 @@
 (ns aoc2018-1
   (:require [clojure.java.io :as io] [clojure.string :as str]))
-  
-(def input-file (io/resource "day1.sample.txt"))
-(def inputs (map 
-             #(Integer/parseInt %) 
-             (str/split (slurp input-file) #"\n")))
 
-;; (def inputs `[3, 3, 4, -2, -4, 3, 3, 3])
-;; ;; 파트 1
-;; ;; 주어진 입력의 모든 숫자를 더하시오.
-;; ;; 예) +10 -2 -5 +1 이 입력일 경우 4를 출력
-(reduce + inputs)
+(defn get-input-puzzle
+  "문제의 인풋 데이터를 읽은 다음 파싱된 값을 제공하는 함수
+   input: 인풋 데이터 파일 이름
+   output: newline 문자 기준으로 split된 리스트"
+  [filename]
+  (let [input-file (io/resource filename)]
+    (map #(Integer/parseInt %) (str/split (slurp input-file) #"\n"))))
 
-;; ;; 파트 2
-;; ;; 주어진 입력의 숫자를 더할 때 마다 나오는 숫자 중, 처음으로 두번 나오는 숫자를 리턴하시오.
-;; ;; 예) +3, +3, +4, -2, -4 는 10이 처음으로 두번 나오는 숫자임.
-;; ;; 0 -> 3 (+3) -> 6 (+3) -> 10(+4) -> 8(-2) -> 4(-4) -> 7(+3) -> 10(+3) -> ...
-;; (def inputs-length (count inputs))
-;; (loop [idx 0 sum 0 results #{0}]
-;;   (let [sum (+ sum (nth inputs idx))]
-;;     (if (contains? results sum)
-;;       sum
-;;       (recur (mod (+ idx 1) inputs-length) sum (conj results sum)))))
-  
-(loop [inputs (cycle inputs) sum 0 results #{0}]
-  (let [sum (+ sum (first inputs))]
-    (if (contains? results sum)
-      sum
-      (recur (next inputs) sum (conj results sum)))))
+;; part1
+(defn solve-part1
+  [inputs]
+  (apply + inputs))
 
-;; #################################
-;; ###        Refactoring        ###
-;; #################################
+(comment
+  (solve-part1 (get-input-puzzle "day1.sample.txt")))
 
-;; cycle 혹은 reductions 사용하기
-;; loop-recur 시 let으로 바인딩하기
+
+;; part2
+(defn find-first-duplicated
+  "시퀀스의 가장 앞에서부터 최초로 중복 등장하는 값을 찾는 함수
+   input: 시퀀스
+   output: 가장 최초로 중복된 값"
+  [inputs]
+  (loop [inputs inputs
+         visited #{0}]
+    (let [curr-num (first inputs)]
+      (if (visited curr-num)
+        curr-num
+        (recur (next inputs) (conj visited curr-num))))))
+
+(defn solve-part2
+  [inputs]
+  (find-first-duplicated (reductions + (cycle inputs))))
+
+(comment
+  (solve-part2 (get-input-puzzle "day1.sample.txt")))
+
+;; part2 번외) 쓰레딩 매크로 활용해보기
+(comment
+  (->> "day1.sample.txt"
+       get-input-puzzle
+       cycle
+       (reductions +)
+       find-first-duplicated))
