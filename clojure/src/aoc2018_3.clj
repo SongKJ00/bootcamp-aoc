@@ -1,4 +1,5 @@
-(ns aoc2018_3)
+(ns aoc2018_3
+  (:require [clojure.java.io :as io] [clojure.string :as str]))
 
 
 ;; 파트 1
@@ -22,8 +23,33 @@
 
 ;; 여기서 XX는 ID 1, 2, 3의 영역이 두번 이상 겹치는 지역.
 ;; 겹치는 지역의 갯수를 출력하시오. (위의 예시에서는 4)
+(defn get-input-puzzle
+  [filename]
+  (let [input-file (io/resource filename)]
+    (str/split (slurp input-file) #"\n")))
 
+(defn parse-inputs
+  [inputs]
+  (let [blocks (map #(Integer/parseInt %) (drop 1 (str/split inputs #"#|( @ )|,|: |x")))] 
+    {:id (nth blocks 0),
+     :start-x (nth blocks 1),
+     :start-y (nth blocks 2),
+     :len-x (nth blocks 3),
+     :len-y (nth blocks 4)}))
 
+(defn get-used-coords
+  [{:keys [start-x start-y len-x len-y]}]
+  (for [x (range len-x) y (range len-y)] [(+ start-x x) (+ start-y y)]))
+
+(comment
+  (->> (get-input-puzzle "day3.sample.txt")
+       (map parse-inputs)
+       (map get-used-coords)
+       (apply concat)
+       frequencies
+       vals
+       (filter #(> % 1))
+       count))
 
 
 ;; 파트 2
