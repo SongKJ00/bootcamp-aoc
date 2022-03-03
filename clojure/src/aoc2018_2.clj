@@ -23,7 +23,7 @@
    input: #{1 2}, 2
    output: 1"
   [frequencies-set frequency]
-  (->> (keep (fn [v] (if (= v frequency) v)) frequencies-set)
+  (->> (keep (fn [v] (when (= v frequency) v)) frequencies-set)
        count))
 
 (defn get-frequencies-info
@@ -85,7 +85,7 @@
    output: \"fgij\""
   [[s1 s2]]
   (->> (map vector s1 s2)
-       (keep (fn [[c1 c2]] (if (= c1 c2) c1)))
+       (keep (fn [[c1 c2]] (when (= c1 c2) c1)))
        (apply str)))
 
 
