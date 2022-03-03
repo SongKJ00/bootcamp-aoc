@@ -23,8 +23,7 @@
    input: #{1 2}, 2
    output: 1"
   [frequencies-set frequency]
-  (->> (keep (fn [v] (when (= v frequency) v)) frequencies-set)
-       count))
+  (if (frequencies-set frequency) 1 0))
 
 (defn get-frequencies-info
   "set에서 찾고자 하는 값들의 존재 여부를 리스트로 반환
@@ -37,8 +36,27 @@
   (->> (get-input-puzzle "day2.sample.txt")
        (map get-frequencies-set)
        (map (partial get-frequencies-info [2 3]))
-       (apply map +)
-       (apply *)))
+       (apply map +) ; goodgood
+       (apply *))
+  
+;; part1 리뷰 반영
+(defn keep-only-n 
+  "각 set마다 n을 포함하고 있으면 n을 keep함
+   input: 2, (#{1 2} #{1 3} #{1 2})
+   output: (2 2)"
+  [n sets]
+  (keep (fn [s] (s n)) sets))
+
+(def keep-only-2 (partial keep-only-n 2))
+(def keep-only-3 (partial keep-only-n 3))
+  
+(comment
+  (->> (get-input-puzzle "day2.sample.txt")
+       (map get-frequencies-set)
+       ((juxt keep-only-2 keep-only-3))
+       (map count)
+       (apply *))
+  )
 
 ;; part2
 (defn diff-only-one-letter
@@ -104,4 +122,5 @@
        get-combination
        (filter diff-only-one-letter)
        (map get-same-part)
-       first))
+       first)
+  )
