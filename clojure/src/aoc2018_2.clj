@@ -23,7 +23,8 @@
    input: 중복 횟수 set, 찾고자 하는 값
    output: 값이 있는 경우) 1, 없는 경우) 0"
   [frequencies-set frequency]
-  (if (frequencies-set frequency) 1 0))
+  (->> (keep (fn [v] (if (= v frequency) v)) frequencies-set)
+       count))
 
 (defn get-frequencies-info
   "set에서 찾고자 하는 값들의 존재 여부를 리스트로 반환
@@ -35,23 +36,12 @@
   [frequencies frequencies-set]
   (map (partial contains-frequency frequencies-set) frequencies))
 
-;; (defn get-frequencies-info
-;;   [frequencies frequencies-set]
-;;   (list
-;;    contains-frequency frequencies-set 2
-;;    contains-frequency frequencies-set 3
-
 (comment
   (->> (get-input-puzzle "day2.sample.txt")
        (map get-frequencies-set)
        (map (partial get-frequencies-info [2 3]))
-       (reduce (fn [x y] (map + x y)))
-       (reduce (fn [acc val] (map + acc val)))
-       (apply map +) ; goodgood
-       (apply *))
-
-  (apply map + [[1, 1] [1, 0] [0, 1] [0, 0]])
-  (map + [1 1] [1 0] [0 1] [0 0]))
+       (apply map +)
+       (apply *)))
 
 ;; part2
 (defn diff-only-one-letter
