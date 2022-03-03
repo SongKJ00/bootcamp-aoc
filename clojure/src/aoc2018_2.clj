@@ -2,11 +2,6 @@
   (:require [clojure.java.io :as io] [clojure.string :as str]))
 
 ;; part1
-(defn get-input-puzzle
-  [filename]
-  (let [input-file (io/resource filename)]
-    (str/split (slurp input-file) #"\n")))
-
 (defn get-input-puzzle [filename]
   (-> filename
       io/resource
@@ -62,15 +57,12 @@
 (defn diff-only-one-letter
   "두 문자열들끼리 한 문자만 서로 다른지 체크하는 함수"
   [[s1 s2]]
-        (->> (map vector s1 s2)
-             (filter not=)
+  (->> (map vector s1 s2)
+       (filter (fn [[c1 c2]] (not= c1 c2)))
        count
        (= 1)))
 
-; (keep)
-; keep nil이 아닌 값만 반환
-; 자매품 remove
-
+;; loop/recur 사용 버전(초기)
 (defn get-same-part
   "두 문자열간 같은 부분 문자열을 찾는 함수"
   [[s1 s2]]
@@ -81,11 +73,28 @@
       (if (= (nth s1 idx) (nth s2 idx))
         (recur (inc idx) max-length (str same-part (nth s1 idx)))
         (recur (+ idx 1) max-length same-part))
-      same-part))) ; 처음하면 다 이렇게 함
-;; loop-recur *압수* ㅋㅋㅋㅋㅋㅋㅋㅋ 떽!
-;; loop-recur -> reduce -> map (or 다른 high level function)
+      same-part)))
 
-  (defn get-combination
+;; reduce 사용 버전
+(defn get-same-part
+  "두 문자열간 같은 부분 문자열을 찾는 함수"
+  [[s1 s2]]
+  (->> (map vector s1 s2)
+       (reduce (fn [same-part [c1 c2]] 
+          (if (= c1 c2)
+            (str same-part (str c1))
+            same-part)) "")))
+
+;; keep 사용 버전
+(defn get-same-part
+  "두 문자열간 같은 부분 문자열을 찾는 함수"
+  [[s1 s2]]
+  (->> (map vector s1 s2)
+       (keep (fn [[c1 c2]] (if (= c1 c2) c1)))
+       (apply str)))
+
+
+(defn get-combination
   "리스트에서 각 요소별 조합 가능한 모든 경우를 벡터로 만들어 반환
    ex) [1 2 3] -> [[1 2] [1 3] [2 1] [2 3] [3 1] [3 2]]"
   [box-ids]
@@ -96,7 +105,7 @@
 
 (comment
   (->> (get-input-puzzle "day2.sample.txt")
-       get-combination  ; :+1:
+       get-combination
        (filter diff-only-one-letter)
        (map get-same-part)
        first))
