@@ -7,6 +7,12 @@
   (let [input-file (io/resource filename)]
     (str/split (slurp input-file) #"\n")))
 
+(defn get-input-puzzle [filename]
+  (-> filename
+      io/resource
+      slurp
+      (str/split #"\n")))
+
 (defn get-frequencies-set
   "문자열에서 문자가 중복된 횟수에 대한 set을 제공하는 함수
    input: 문자열(box-id)
@@ -29,6 +35,7 @@
    input: 찾고자 하는 값 리스트, 중복 횟수 set
    output: ex) 인풋으로 [2, 3]이 들어오고 모두 있는 경우) - (1, 1)
                                      2만 있는 경우) - (1, 0)
+                                     3만 있는 경우) - (0, 1)
                                      모두 없는 경우) - (0, 0)"
   [frequencies frequencies-set]
   (map (partial contains-frequency frequencies-set) frequencies))
@@ -37,23 +44,32 @@
 ;;   [frequencies frequencies-set]
 ;;   (list
 ;;    contains-frequency frequencies-set 2
-;;    contains-frequency frequencies-set 3))
+;;    contains-frequency frequencies-set 3
 
 (comment
   (->> (get-input-puzzle "day2.sample.txt")
        (map get-frequencies-set)
        (map (partial get-frequencies-info [2 3]))
        (reduce (fn [x y] (map + x y)))
-       (apply *)))
+       (reduce (fn [acc val] (map + acc val)))
+       (apply map +) ; goodgood
+       (apply *))
+
+  (apply map + [[1, 1] [1, 0] [0, 1] [0, 0]])
+  (map + [1 1] [1 0] [0 1] [0 0]))
 
 ;; part2
 (defn diff-only-one-letter
   "두 문자열들끼리 한 문자만 서로 다른지 체크하는 함수"
   [[s1 s2]]
-  (->> (map not= s1 s2)
-       (filter true?)
+        (->> (map vector s1 s2)
+             (filter not=)
        count
        (= 1)))
+
+; (keep)
+; keep nil이 아닌 값만 반환
+; 자매품 remove
 
 (defn get-same-part
   "두 문자열간 같은 부분 문자열을 찾는 함수"
@@ -63,22 +79,24 @@
          same-part ""]
     (if (< idx max-length)
       (if (= (nth s1 idx) (nth s2 idx))
-        (recur (+ idx 1) max-length (str same-part (nth s1 idx)))
+        (recur (inc idx) max-length (str same-part (nth s1 idx)))
         (recur (+ idx 1) max-length same-part))
-      same-part)))
+      same-part))) ; 처음하면 다 이렇게 함
+;; loop-recur *압수* ㅋㅋㅋㅋㅋㅋㅋㅋ 떽!
+;; loop-recur -> reduce -> map (or 다른 high level function)
 
-(defn get-combination
+  (defn get-combination
   "리스트에서 각 요소별 조합 가능한 모든 경우를 벡터로 만들어 반환
    ex) [1 2 3] -> [[1 2] [1 3] [2 1] [2 3] [3 1] [3 2]]"
   [box-ids]
   (for [x box-ids
         y box-ids
         :when (not= x y)]
-    (vector x y)))
+    [x y]))
 
 (comment
   (->> (get-input-puzzle "day2.sample.txt")
-       (get-combination)
+       get-combination  ; :+1:
        (filter diff-only-one-letter)
        (map get-same-part)
        first))
