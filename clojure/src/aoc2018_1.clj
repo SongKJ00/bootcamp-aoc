@@ -31,6 +31,21 @@
         curr-num
         (recur (next inputs) (conj visited curr-num))))))
 
+
+;; loop/recur -> reduce/reduced로 리팩토링
+(defn find-first-duplicated
+  "시퀀스의 가장 앞에서부터 최초로 중복 등장하는 값을 찾는 함수
+   input: 시퀀스
+   output: 가장 최초로 중복된 값"
+  [inputs]
+  (reduce
+   (fn [visited curr-num]
+     (if (visited curr-num)
+        (reduced curr-num)
+        (conj visited curr-num)))
+   #{0}
+   inputs))
+
 (defn solve-part2
   [inputs]
   (find-first-duplicated (reductions + (cycle inputs))))
