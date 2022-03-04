@@ -1,5 +1,6 @@
 (ns aoc2018-1
-  (:require [clojure.java.io :as io] [clojure.string :as str]))
+  (:require [clojure.java.io :as io] 
+            [clojure.string :as str]))
 
 (defn get-input-puzzle
   "문제의 인풋 데이터를 읽은 다음 파싱된 값을 제공하는 함수
