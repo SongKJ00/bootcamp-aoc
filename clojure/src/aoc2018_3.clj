@@ -73,7 +73,7 @@
   [input]
   {:id (:id input) :coords (get-coords input)})
 
-(defn disjoint-sets
+(defn is-disjoint-sets
   "두 set이 서로소 집합인지 체크
    input: #{1 2} #{3 4}
    output: true"
@@ -85,7 +85,7 @@
   (let [duplicated-coords (get-duplicated-coords inputs)]
     (->> inputs
          (map get-coords-with-id)
-         (filter (fn [v] (disjoint-sets (set (:coords v)) (set duplicated-coords))))
+         (filter (fn [v] (is-disjoint-sets (set (:coords v)) (set duplicated-coords))))
          first
          :id)))
 
