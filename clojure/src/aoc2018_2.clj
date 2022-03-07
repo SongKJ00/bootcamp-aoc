@@ -59,7 +59,7 @@
   )
 
 ;; part2
-(defn has-only-one
+(defn only-one?
   "리스트의 엘리먼트 갯수가 하나만 있는지 체크하는 함수
   input: [a]
    output: true"
@@ -73,7 +73,7 @@
   [[s1 s2]]
   (->> (map vector s1 s2)
        (filter (fn [[c1 c2]] (not= c1 c2)))
-       has-only-one))
+       only-one?))
 
 ;; loop/recur 사용 버전(초기)
 (defn get-same-part

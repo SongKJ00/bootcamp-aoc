@@ -9,6 +9,12 @@
       slurp
       (str/split #"\n")))
 
+(defn parse
+  [input]
+  (-> input
+      parse-input
+      ->claim))
+
 (defn parse-input
   "re-find를 이용하여 인풋 파싱
    input: #947 @ 775,93: 16x14
@@ -19,7 +25,7 @@
        rest
        (map #(Integer/parseInt %))))
 
-(defn get-claim
+(defn ->claim
   "파싱한 인풋으로 claim map 생성
    input: [947, 775, 93, 16, 14]
    output: {:id 947 :x 775 :y 93 :w 16 :h 14}"
@@ -53,8 +59,7 @@
 
 (comment
   (->> (get-input-puzzle "day3.sample.txt")
-       (map parse-input)
-       (map get-claim)
+       (map parse)
        get-duplicated-coords
        count))
 
@@ -93,12 +98,11 @@
 ;; part2 리팩토링
 (comment
   (let [claims (->> (get-input-puzzle "day3.sample.txt")
-                    (map parse-input)
-                    (map get-claim))
-        duplicated-coords (get-duplicated-coords claims)]
+                    (map parse))
+        duplicated-coords (set (get-duplicated-coords claims))]
     (->> claims
          (map get-coords-with-id)
-         (filter #(disjoint-sets? (set (:coords %)) (set duplicated-coords)))
-         (map #(:id %))
+         (filter #(disjoint-sets? (set (:coords %)) duplicated-coords))
+         (map :id)
          first)))
   
