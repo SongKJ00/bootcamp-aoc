@@ -1,13 +1,13 @@
 (ns aoc2018_3
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+            [clojure.string :as string]
             [clojure.set :refer [intersection]]))
 
 (defn get-input-puzzle [filename]
   (-> filename
       io/resource
       slurp
-      (str/split #"\n")))
+      (string/split #"\n")))
 
 (defn parse
   [input]
