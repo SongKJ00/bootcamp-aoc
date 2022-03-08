@@ -56,25 +56,21 @@
                 (diff-only-case? last-ch v) (pop acc)
                 :else (conj acc v)))) [] (into [] s)))
 
+;; part1
 (comment
   (->> (get-input-puzzle "day5.sample.txt")
        react
        count))
 
-;; 파트 2
-;; 주어진 문자열에서 한 유닛 (대문자와 소문자)을 전부 없앤 후 반응시켰을 때, 가장 짧은 문자열의 길이를 리턴하시오.
-;; 예를 들어 dabAcCaCBAcCcaDA 에서 a/A를 없애고 모두 반응시키면 dbCBcD가 되고 길이는 6인데 비해,
-;; 같은 문자열에서 c/C를 없애고 모두 반응시키면 daDA가 남고 길이가 4이므로 4가 가장 짧은 길이가 됨.
 (defn find-all-chars-with-lower-case
   "주어진 문자열에서 등장하는 모든 문자를 소문자 case로 강제 변환해서 반환
    input: \"abBA\"
-   output: [\a \b]
+   output: [\\a \\b]
    
    input: \"dabCBAcaDA\"
-   output: [\d \a \b \c]"
+   output: [\\d \\a \\b \\c]"
   [s]
   (->> s
-       (into [])
        (map string/lower-case)
        set
        (into [])))
@@ -82,11 +78,11 @@
 (defn remove-chars-with-lower-case
   "문자열에서 등장하는 모든 문자를 소문자 case로 바꾸어, 주어진 문자와 일치하는 경우 해당 문자 제거
    input: \"abBa\"
-          \b
+          \\b
    output: \"aa\"
    
    input: \"dabCBAcaDA\"
-          \c
+          \\c
    output: \"dabBAaDa"
   [s c]
   (reduce (fn [acc v]
@@ -94,6 +90,7 @@
               acc
               (str acc v))) "" s))
 
+;; part2
 (comment
   (let [input-str (get-input-puzzle "day5.sample.txt")
         chars-with-lower-case-in-input-str (find-all-chars-with-lower-case input-str)
