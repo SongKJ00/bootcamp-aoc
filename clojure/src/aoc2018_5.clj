@@ -19,16 +19,16 @@
 
 (defn diff-only-case?
   "두 문자가 서로 case만 다른지 체크하는 함수
-   input: \a \A
+   input: \\a \\A
    output: true
 
-   input: \a \a
+   input: \\a \\a
    output: false
 
-   input: \a \b
+   input: \\a \\b
    output: false
    
-   input: \a \B
+   input: \\a \\B
    output: false"
   [a b]
   (= 
@@ -50,11 +50,11 @@
    output: \"dabCBAcaDA\""
   [s]
   (reduce (fn [acc v] 
-            (let [last-ch (last acc)]
+            (let [last-ch (peek acc)]
               (cond
                 (empty? acc) (conj acc v)
                 (diff-only-case? last-ch v) (pop acc)
-                :else (conj acc v)))) [] (into [] s)))
+                :else (conj acc v)))) [] s))
 
 ;; part1
 (comment
@@ -94,8 +94,8 @@
 (comment
   (let [input-str (get-input-puzzle "day5.sample.txt")
         chars-with-lower-case-in-input-str (find-all-chars-with-lower-case input-str)
-        char-removed-input-strs (for [c chars-with-lower-case-in-input-str]
-                                  (remove-chars-with-lower-case input-str c))]
+        char-removed-input-strs (map #(remove-chars-with-lower-case input-str %) 
+                                     chars-with-lower-case-in-input-str)]
     (->> char-removed-input-strs
          (map react)
          (map count)
