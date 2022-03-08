@@ -111,7 +111,7 @@
      :total-sleep-time total-sleep-time
      :sleep-minutes sleep-minutes}))
 
-(defn find-most-sleep-minute
+(defn find-most-sleep-minute-with-freq
   "가드가 잤던 분(minute)들 중에 가장 많이 겹치는 분과 해당 분의 frequency를 제공하는 함수
    input: {:guard-id 2969 
            :sleep-minutes (1 3 1 1 3 0)}
@@ -131,7 +131,7 @@
        sort
        parse
        (apply max-key :total-sleep-time)
-       find-most-sleep-minute
+       find-most-sleep-minute-with-freq
        ((juxt :guard-id :most-sleep-minute))
        (apply *)))
 
