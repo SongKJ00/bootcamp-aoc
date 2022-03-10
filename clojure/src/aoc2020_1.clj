@@ -12,46 +12,41 @@
   [inputs]
   (map #(Integer/parseInt %) inputs))
 
-(defn get-combination-two
-  "주어진 정수 리스트에서 두 개씩 묶을 때 가능한 모든 조합을 리턴
-   input: (1 2 3)
-   output: ([1 2] [1 3] [2 1] [2 3] [3 1] [3 2])"
+(defn find-two-entries-sum-to-2020
+  "주어진 정수 리스트에서 두 개씩 묶어 서로 더했을 때 2020인 조합 리턴
+   input: (1721 979 366 299 675 1456)
+   output: ([1721 299] [299 1721])"
   [entries]
   (for [x entries
         y entries
-        :when (not= x y)]
+        :when (= (+ x y) 2020)]
     [x y]))
 
 ;; part1
 (comment
-  (let [combinations (-> (get-input-puzzle "2020/day1.sample.txt")
-                         parse
-                         get-combination-two)]
-    (->> combinations
-         (filter (fn [[x y]] (= (+ x y) 2020)))
-         first
+  (let [two-entries-sum-to-2020 (-> (get-input-puzzle "2020/day1.sample.txt")
+                                    parse
+                                    find-two-entries-sum-to-2020
+                                    first)]
+    (->> two-entries-sum-to-2020
          (apply *))))
   
 ;; part2
-(defn get-combination-three
-  "주어진 정수 리스트에서 세 개씩 묶을 때 가능한 모든 조합을 리턴
-   input: (1 2 3)
-   output: ([1 2 3] [1 3 2] [2 1 3] [2 3 1] [3 1 2] [3 2 1])"
+(defn find-three-entries-sum-to-2020
+  "주어진 정수 리스트에서 세 개씩 묶어 서로 더했을 때 2020인 조합 리턴
+   input: (1721 979 366 299 675 1456)
+   output: ([1721 299] [299 1721])"
   [entries]
   (for [x entries
         y entries
         z entries
-        :when (and 
-               (not= x y)
-               (not= y z)
-               (not= x z))]
+        :when (= (+ x y z) 2020)]
     [x y z]))
 
 (comment
-  (let [combinations (-> (get-input-puzzle "2020/day1.sample.txt")
-                         parse
-                         get-combination-three)]
-    (->> combinations
-         (filter (fn [[x y z]] (= (+ x y z) 2020)))
-         first
+  (let [three-entries-sum-to-2020 (-> (get-input-puzzle "2020/day1.sample.txt")
+                                      parse
+                                      find-three-entries-sum-to-2020
+                                      first)]
+    (->> three-entries-sum-to-2020
          (apply *))))
