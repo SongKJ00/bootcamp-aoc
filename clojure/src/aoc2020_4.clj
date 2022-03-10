@@ -218,3 +218,11 @@
        get-passports-have-all-required-fields
        (filter all-fields-valid?)
        count))
+
+;; clojure.spec
+;; https://clojure.org/guides/spec
+
+;; iterate / drop-while / take-while
+;; ->> init-state (iterate x) (drop-while/take-while y) (agg...) (...) (...)
+;; iteration -> 1.11.0
+;; https://www.juxt.pro/blog/new-clojure-iteration
