@@ -32,10 +32,10 @@
    input: ((1 1) (2 2))
    output: ({:id 0 :x 1 :y 1} {:id 1 :x 2 :y 2})"
   [coords]
-  (map-indexed (fn [idx coord] 
+  (map-indexed (fn [idx [x y]] ; destructuring
                  {:id idx
-                  :x (first coord)
-                  :y (second coord)}) coords))
+                  :x x
+                  :y y}) coords))
 
 (defn get-border-coords
   "x, y 최솟값 최댓값을 받아 해당 범위 안에 있는 좌표들을 반환
@@ -60,18 +60,20 @@
 
 (defn get-distances-from-start-coords
   "특정 좌표을 기준으로 하여 시작 좌표들로부터의 거리를 맵으로 담아 리턴
-   input: [1 1]
-          ({:id 0 :x 1 :y 1} {:id 1 :x 2 :y 2} {:id 2 :x 3 :y 3})
+   input: ({:id 0 :x 1 :y 1} {:id 1 :x 2 :y 2} {:id 2 :x 3 :y 3})
+          [1 1]
    output: {:x 1 :y 1 :distances-from-start-coords ({:id 0 :distance 0} 
                                                     {:id 1 :distance 2} 
                                                     {:id 2 :distance 4})}"
-  [[x y] start-coords-with-id]
+  [start-coords-with-id [x y]]
   (let [distances-from-start-coords (->> start-coords-with-id
-                                         (map (fn [start-coord]
-                                                {:id (:id start-coord)
+                                         (map (fn [{start-coord-id :id
+                                                    start-coord-x :x
+                                                    start-coord-y :y}] ;; 구조분해!!
+                                                {:id start-coord-id
                                                  :distance (get-manhattan-distance
                                                             [x y]
-                                                            [(:x start-coord) (:y start-coord)])})))]
+                                                            [start-coord-x start-coord-y])})))]
     {:x x
      :y y
      :distances-from-start-coords distances-from-start-coords}))
@@ -112,11 +114,17 @@
 
 (defn get-coords-which-have-only-one-closest-id
   "가장 가까운 id가 단 하나만 있는 좌표만 리턴
-   input: ({:x 1 :y 1 :closest-ids (1 2)}
-           {:x 2 :y 2 :closest-ids (3)}
-           {:x 3 :y 3 :closest-ids (4)})
-   output: ({:x 2 :y 2 :closest-id 3}
-            {:x 3 :y 3 :closest-id 4)"
+   input: ({:x 1 :y 1 :distances-from-start-coords ({:id 0 :distance 0} 
+                                                    {:id 1 :distance 1} 
+                                                    {:id 2 :distance 2})}
+           {:x 2 :y 2 :distances-from-start-coords ({:id 0 :distance 2} 
+                                                    {:id 1 :distance 1} 
+                                                    {:id 2 :distance 0})}
+           {:x 3 :y 3 :distances-from-start-coords ({:id 0 :distance 2} 
+                                                    {:id 1 :distance 2} 
+                                                    {:id 2 :distance 5})})
+   output: ({:x 1 :y 1 :closest-id 0}
+            {:x 2 :y 2 :closest-id 2)"
   [distance-from-start-coords]
   (let [closest-ids (->> distance-from-start-coords
                          (map get-closest-ids))]
@@ -125,13 +133,19 @@
        (map (fn [{:keys [x y closest-ids]}] 
               {:x x :y y :closest-id (first closest-ids)})))))
 
-(defn get-closest-coords-each-ids
+(defn get-each-ids-closest-coords
   "각 id별로 가장 가까운 좌표 리스트들을 담아 리턴
    단, 특정 좌표에 여러 id가 가장 가까운 경우는 배제
-   input: ({:x 1 :y 1 :closest-ids (1 2)}
-           {:x 2 :y 2 :closest-ids (1)}
-           {:x 3 :y 3 :closest-ids (2)})
-   output: ({:id 1 :closest-coords [{:x 2 :y 2}]}
+   input: ({:x 1 :y 1 :distances-from-start-coords ({:id 0 :distance 0} 
+                                                    {:id 1 :distance 1} 
+                                                    {:id 2 :distance 2})}
+           {:x 2 :y 2 :distances-from-start-coords ({:id 0 :distance 2} 
+                                                    {:id 1 :distance 1} 
+                                                    {:id 2 :distance 0})}
+           {:x 3 :y 3 :distances-from-start-coords ({:id 0 :distance 2} 
+                                                    {:id 1 :distance 2} 
+                                                    {:id 2 :distance 5})})
+   output: ({:id 0 :closest-coords [{:x 1 :y 1}]}
             {:id 2 :closest-coords [{:x 3 :y 3}]})"
   [distance-from-start-coords]
   (let [coords-have-only-one-closest-id (get-coords-which-have-only-one-closest-id distance-from-start-coords)]
@@ -144,14 +158,14 @@
 (defn finite-id?
   "유한하게 확장할 수 있는 id인지 체크
    보유하고 있는 좌표 중 하나라도 min이나 max와 같다면 유한하게 확장할 수 없음.
-   input: {:closest-coords [{:x 1 :y 1} {:x 3 :y 3}]}
-          {:min-x 0 :min-y 0 :max-x 5 :max-y 5}
+   input: {:min-x 0 :min-y 0 :max-x 5 :max-y 5}
+          {:closest-coords [{:x 1 :y 1} {:x 3 :y 3}]}
    output: false
    
-   input: {:closest-coords [{:x 0 :y 1} {:x 3 :y 3}]}
-          {:min-x 0 :min-y 1 :max-x 5 :max-y 5}
+   input: {:min-x 0 :min-y 1 :max-x 5 :max-y 5}
+          {:closest-coords [{:x 0 :y 1} {:x 3 :y 3}]}
    output: true"
-  [{:keys [closest-coords]} {:keys [min-x min-y max-x max-y]}]
+  [{:keys [min-x min-y max-x max-y]} {:keys [closest-coords]}]
   (let [coords-at-border-edges (->> closest-coords
                                     (filter (fn [{:keys [x y]}]
                                               (or
@@ -166,10 +180,11 @@
         start-coords-with-id (get-start-coords-with-id inputs)
         min-max-coords (find-min-max-coords start-coords-with-id)
         border-coords (get-border-coords min-max-coords)
-        distances-from-start-coords (map #(get-distances-from-start-coords % start-coords-with-id) border-coords)
-        closest-coords-each-ids (get-closest-coords-each-ids distances-from-start-coords)]
-    (->> closest-coords-each-ids
-         (filter #(finite-id? % min-max-coords))
+        distances-from-start-coords (->> border-coords
+                                         (map (partial get-distances-from-start-coords start-coords-with-id)))
+        each-ids-closest-coords (get-each-ids-closest-coords distances-from-start-coords)]
+    (->> each-ids-closest-coords
+         (filter (partial finite-id? min-max-coords))
          (map :closest-coords)
          (map count)
          (apply max))))
@@ -186,9 +201,10 @@
         start-coords-with-id (get-start-coords-with-id inputs)
         min-max-coords (find-min-max-coords start-coords-with-id)
         border-coords (get-border-coords min-max-coords)
-        distances-from-start-coords (map #(get-distances-from-start-coords % start-coords-with-id) border-coords)]
+        distances-from-start-coords (->> border-coords
+                                         (map (partial get-distances-from-start-coords start-coords-with-id)))]
     (->> distances-from-start-coords
          (map :distances-from-start-coords)
-         (map sum-distances)
+         (map sum-distances-from-start-coords)
          (filter #(< % 10000))
          count)))
