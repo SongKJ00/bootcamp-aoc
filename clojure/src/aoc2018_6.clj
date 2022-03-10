@@ -175,9 +175,9 @@
          (apply max))))
 
 ;; part 2
-(defn sum-distances
-  [distances]
-  (->> distances
+(defn sum-distances-from-start-coords
+  [distances-from-start-coords]
+  (->> distances-from-start-coords
        (map :distance)
        (apply +)))
 
