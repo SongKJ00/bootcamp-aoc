@@ -1,6 +1,7 @@
 (ns aoc2020-4
   (:require [clojure.java.io :as io] 
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [clojure.spec.alpha :as s]))
 
 (defn get-input-puzzle [filename]
   (-> filename
@@ -78,80 +79,7 @@
        get-passports-have-all-required-fields
        count))
 
-;;part2
-(defn all-fields-valid?
-  "passport의 field들이 모두 valid한지 체크"
-  [passport]
-  ((every-pred
-    byr-valid?
-    iyr-valid?
-    eyr-valid?
-    hgt-valid?
-    hcl-valid?
-    ecl-valid?
-    pid-valid?) passport))
-
-(defn four-digits?
-  "주어진 숫자가 네자리수인지 체크
-   input: 3000
-   output: true
-   
-   input: 300
-   output: false"
-  [n]
-  (int-in-range? (quot n 1000) [1 9]))
-
-(defn int-in-range?
-  "주어진 숫자가 범위 안에 들어있는지 체크
-   input: 3 [1 3]
-   output: true
-   
-   input: 3 [1 2]
-   output: false"
-  [x [a b]]
-  (and
-   (>= x a)
-   (<= x b)))
-
-(defn byr-valid?
-  "byr 필드값이 valid한지 체크
-   조건) 네자릿수이고 1920 ~ 2002 범위 안에 있어야 함
-   input: 2000
-   output: true
-   
-   input: 5000
-   output: false"
-  [{:keys [:byr]}]
-  (and
-   (four-digits? byr)
-   (int-in-range? byr [1920 2002])))
-
-(defn iyr-valid?
-  "iyr 필드값이 valid한지 체크
-   조건) 네자릿수이고 2010 ~ 2020 범위 안에 있어야 함
-   input: 2021
-   output: true
-   
-   input: 2030
-   output: false"
-  [{:keys [iyr]}]
-  (and
-   (four-digits? iyr)
-   (int-in-range? iyr [2010 2020])))
-
-(defn eyr-valid?
-  "eyr 필드값이 valid한지 체크
-   조건) 네자릿수이고 2020 ~ 2030 범위 안에 있어야 함
-   input: 2020
-   output: true
-   
-   input: 2010
-   output: false"
-  [{:keys [eyr]}]
-  (and
-   (four-digits? eyr)
-   (int-in-range? eyr [2020 2030])))
-
+;; part2
 (defn hgt-valid?
   "hgt 필드값이 valid한지 체크
    조건) 1) 맨 뒤에 cm 혹은 in 단위가 있어야 함
@@ -166,7 +94,7 @@
    
    input: 150
    output: false"
-  [{:keys [hgt]}]
+  [hgt]
   (let [unit (subs hgt (- (count hgt) 2))
         cm? (= unit "cm")
         in? (= unit "in")
@@ -178,24 +106,6 @@
        cm? (int-in-range? hgt-int [150 193])
        in? (int-in-range? hgt-int [59 76])))))
 
-(defn hcl-valid?
-  "hcl 필드값이 valid한지 체크
-   조건) #으로 시작하고 0-9 혹은 a-f로 된 문자가 6개 있어야 함
-   input: #123abc
-   output: true
-   
-   input: #123abz
-   output: false"
-  [{:keys [hcl]}]
-  (let [match (re-matches #"#[0-9a-f]{6}" hcl)]
-    (some? match)))
-
-(defn ecl-valid?
-  "ecl 필드값이 valid한지 체크
-   조건) [\"amb\" \"blu\" \"brn\" \"gry\" \"grn\" \"hzl\" \"oth\"] 안에 값이 있어야 함"
-  [{:keys [ecl]}]
-  (some #(= % ecl) ["amb" "blu" "brn" "gry" "grn" "hzl" "oth"]))
-
 (defn pid-valid?
   "pid 필드값이 valid한지 체크
    조건) 9자리 숫자이고, 빈 자리는 0으로 채워져있어야 함
@@ -204,19 +114,34 @@
    
    input: \"0123456789\"
    output: false"
-  [{:keys [pid]}]
+  [pid]
   (let [nine-digit? (= (count pid) 9)
         pid-int (when nine-digit? (Integer/parseInt pid))]
     (and
      nine-digit?
      (= pid (format "%09d" pid-int)))))
 
-;; part2
+(s/def :passport/byr (s/int-in 1920 2003))
+(s/def :passport/iyr (s/int-in 2010 2021))
+(s/def :passport/eyr (s/int-in 2020 2031))
+(s/def :passport/hgt hgt-valid?)
+(s/def :passport/hcl #(re-matches #"#[0-9a-f]{6}" %))
+(s/def :passport/ecl #{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"})
+(s/def :passport/pid pid-valid?)
+
+(s/def :passport/passport (s/keys :req-un [:passport/byr
+                                           :passport/iyr
+                                           :passport/eyr
+                                           :passport/hgt
+                                           :passport/hcl
+                                           :passport/ecl
+                                           :passport/pid]))
+
 (comment
   (->> (get-input-puzzle "2020/day4.sample.txt")
        parse
        get-passports-have-all-required-fields
-       (filter all-fields-valid?)
+       (filter #(s/valid? :passport/passport %))
        count))
 
 ;; clojure.spec
