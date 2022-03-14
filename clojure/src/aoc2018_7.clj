@@ -29,14 +29,16 @@
    input: [{:prev C :step A} {:prev C :step F}]
    output: {C #{}, A #{C}, F #{C}}"
   [step-deps]
-  (let [steps (mapcat vals step-deps)
-        initial-graph (reduce (fn [acc v]
+  (let [steps (->> step-deps
+                   (mapcat vals)
+                   set)
+        init-graph (reduce (fn [acc v]
                          (assoc acc v #{}))
                        {}
                        steps)]
     (reduce (fn [acc {:keys [prev step]}]
               (update acc step #(conj % prev)))
-            initial-graph
+            init-graph
             step-deps)))
 
 (defn parse
