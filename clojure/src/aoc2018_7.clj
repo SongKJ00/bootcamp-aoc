@@ -130,8 +130,8 @@
     (-> state
         (update :workers #(concat % new-workers))
         (update :order #(concat % available-steps))
-        (update-in [:graph] #(apply dissoc % available-steps)))))
-    
+        (update :graph #(apply dissoc % available-steps)))))
+
 (defn get-next-state
   "1초가 지난 시점에서 workers에서 처리 완료된 step들을 삭제하고,
    새로운 step을 할당하면서 state 변경
