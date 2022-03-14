@@ -79,9 +79,10 @@
    input: C 60
    output: 63"
   [step offset]
-  (-> (- (int (first step)) (int \A))
-      inc
-      (+ offset)))
+  (let [step-ch (first step)]
+    (-> (- (int step-ch) (int \A))
+        inc
+        (+ offset))))
 
 (defn dealloc-works
   "workers에서 처리 완료된 step들 삭제
