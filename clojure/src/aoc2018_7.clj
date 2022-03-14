@@ -84,7 +84,7 @@
         inc
         (+ offset))))
 
-(defn dealloc-works
+(defn remove-finished-works
   "workers에서 처리 완료된 step들 삭제
    input: {:time 3
            :finished #{}
@@ -154,7 +154,7 @@
   [state]
   (-> state
       (update :time inc)
-      dealloc-works
+      remove-finished-works
       alloc-works))
 
 (defn create-init-state
@@ -179,6 +179,10 @@
    :workers-num workers-num
    :workers []})
 
+(defn processing?
+  [{:keys [finished steps-num]}]
+  (not= (count finished) steps-num))
+
 (comment
   ;; part1
   (let [graph (-> (get-input-puzzle "day7.sample.txt")
@@ -186,7 +190,7 @@
         init-state (create-init-state {:offset 0 :workers-num 1} graph)]
     (->> init-state
          (iterate get-next-state)
-         (drop-while #(not= (count (% :finished)) (% :steps-num)))
+         (drop-while processing?)
          first
          :order
          string/join))
@@ -197,6 +201,6 @@
         init-state (create-init-state {:offset 60 :workers-num 5} graph)]
     (->> init-state
          (iterate get-next-state)
-         (drop-while #(not= (count (% :finished)) (% :steps-num)))
+         (drop-while processing?)
          first
          :time)))
